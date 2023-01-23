@@ -8,6 +8,9 @@ import antifraud.models.Transaction;
 import antifraud.services.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,9 +25,15 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/api/antifraud/transaction")
+    @PreAuthorize("hasRole('USER')")
     TransactionDTO transaction(@RequestBody @Valid Transaction req) throws CannotParseException, NegativeNumberException {
         log.info("Requested {}", req.getAmount());
         TransactionOutput result = transactionService.processing(req.getAmount());
         return new TransactionDTO(result);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> hello() {
+        return ResponseEntity.ok("Test Text");
     }
 }

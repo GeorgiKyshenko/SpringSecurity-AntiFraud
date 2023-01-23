@@ -18,19 +18,20 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NegativeNumberException("Amount should be positive number");
         }
 
+        long amountNumber;
         try {
-            long number;
-            number = Long.parseLong(amount);
-            if (number <= AmountVerification.ALLOWED.getAmount()) {
-                return TransactionOutput.ALLOWED;
-            } else if (number <= AmountVerification.MANUAL_PROCESSING.getAmount()) {
-                return TransactionOutput.MANUAL_PROCESSING;
-            } else {
-                return TransactionOutput.PROHIBITED;
-            }
+            amountNumber = Long.parseLong(amount);
         } catch (Exception exception) {
             log.info("Catch section");
             throw new CannotParseException("Amount should contains only numbers");
+        }
+
+        if (amountNumber <= AmountVerification.ALLOWED.getAmount()) {
+            return TransactionOutput.ALLOWED;
+        } else if (amountNumber <= AmountVerification.MANUAL_PROCESSING.getAmount()) {
+            return TransactionOutput.MANUAL_PROCESSING;
+        } else {
+            return TransactionOutput.PROHIBITED;
         }
     }
 }
