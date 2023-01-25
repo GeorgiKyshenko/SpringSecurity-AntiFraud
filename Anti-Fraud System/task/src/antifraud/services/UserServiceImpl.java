@@ -99,13 +99,13 @@ public class UserServiceImpl implements UserService {
         if (optionalUser.isEmpty()) throw new UserNotFoundException("User not found");
 
         User existingUser = optionalUser.get();
-        String access = "";
-        if (existingUser.getRole().equals(UserRole.ADMINISTRATOR)) {
-            throw new IllegalActionException();
-        } else if (existingUser.isUnlocked() && request.getOperation().equals("LOCK")) {
+        String access = existingUser.isUnlocked() ? "unlocked" : "locked";
+        if (existingUser.getRole().equals(UserRole.ADMINISTRATOR) || request.getOperation().equals("ADMINISTRATOR")) {
+            throw new IllegalActionException("ADMINISTRATOR is already assign");
+        } else if ((existingUser.isUnlocked()) && request.getOperation().equals("LOCK")) {
             existingUser.setUnlocked(false);
             access = "locked";
-        } else if (!existingUser.isUnlocked() && request.getOperation().equals("UNLOCK")) {
+        } else if (!(existingUser.isUnlocked()) && request.getOperation().equals("UNLOCK")) {
             existingUser.setUnlocked(true);
             access = "unlocked";
         }
