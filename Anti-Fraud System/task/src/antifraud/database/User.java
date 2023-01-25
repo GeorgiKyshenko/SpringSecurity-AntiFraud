@@ -29,6 +29,8 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private UserRole role;
+    @Column(name = "is_unlocked")
+    private boolean isUnlocked;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

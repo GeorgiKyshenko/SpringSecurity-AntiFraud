@@ -25,7 +25,6 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/api/antifraud/transaction")
-    @PreAuthorize("hasRole('USER')")
     TransactionDTO transaction(@RequestBody @Valid Transaction req) throws CannotParseException, NegativeNumberException {
         log.info("Requested {}", req.getAmount());
         TransactionOutput result = transactionService.processing(req.getAmount());

@@ -25,6 +25,11 @@ public class SecurityConfiguration {
                 .and()
                 .authorizeRequests() // manage access
                 .antMatchers(HttpMethod.POST, "/api/auth/user").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/antifraud/transaction/**").hasAuthority("MERCHANT")
+                .antMatchers(HttpMethod.GET, "/api/auth/list").hasAnyAuthority("ADMINISTRATOR", "SUPPORT")
+                .antMatchers(HttpMethod.DELETE, "/api/auth/user/{username}").hasAuthority("ADMINISTRATOR")
+                .antMatchers(HttpMethod.PUT, "/api/auth/role").hasAuthority("ADMINISTRATOR")
+                .antMatchers(HttpMethod.PUT, "/api/auth/access").hasAuthority("ADMINISTRATOR")
                 .antMatchers("/actuator/shutdown").permitAll() // needs to run test
                 // other matchers
                 .and()

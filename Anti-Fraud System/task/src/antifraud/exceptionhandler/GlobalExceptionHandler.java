@@ -1,10 +1,7 @@
 package antifraud.exceptionhandler;
 
-import antifraud.errors.BusinessException;
+import antifraud.errors.*;
 import antifraud.errors.DTO.ErrorDTO;
-import antifraud.errors.ExistingUserException;
-import antifraud.errors.NegativeNumberException;
-import antifraud.errors.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +35,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     ResponseEntity<ErrorDTO> errorHandler(UserNotFoundException exception) {
         log.info("User Not Found user exception");
+        return ResponseEntity.status(404)
+                .body(new ErrorDTO(exception.getMessage()));
+    }
+
+    @ExceptionHandler
+    ResponseEntity<ErrorDTO> errorHandler(NotViableRoleException exception) {
+        log.info("Role is not SUPPORT/MERCHANT exception");
+        return ResponseEntity.status(400)
+                .body(new ErrorDTO(exception.getMessage()));
+    }
+
+    @ExceptionHandler
+    ResponseEntity<ErrorDTO> errorHandler(IllegalRoleUpdateException exception) {
+        log.info("User is already assign to this role exception");
+        return ResponseEntity.status(409)
+                .body(new ErrorDTO(exception.getMessage()));
+    }
+
+    @ExceptionHandler
+    ResponseEntity<ErrorDTO> errorHandler(IllegalActionException exception) {
+        log.info("Unauthorized actions against ADMINISTRATOR user exception");
         return ResponseEntity.status(404)
                 .body(new ErrorDTO(exception.getMessage()));
     }

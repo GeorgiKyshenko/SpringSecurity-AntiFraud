@@ -1,8 +1,8 @@
 package antifraud.models.DTO;
 
+import antifraud.constants.UserRole;
 import lombok.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @AllArgsConstructor
@@ -17,5 +17,7 @@ public class UserRegisterResponse {
     private String name;
     @NotNull
     private String username;
+    @NotNull
+    private UserRole role;
 
 }

@@ -1,14 +1,13 @@
 package antifraud.controllers;
 
 import antifraud.database.User;
-import antifraud.errors.ExistingUserException;
-import antifraud.errors.UserNotFoundException;
-import antifraud.models.DTO.DeleteUserResponse;
-import antifraud.models.DTO.UserRegisterResponse;
+import antifraud.errors.*;
+import antifraud.models.DTO.*;
 import antifraud.models.UserRegisterRequest;
 import antifraud.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,16 +27,31 @@ public class RegistrationController {
     }
 
     @GetMapping("/api/auth/list")
-    @PreAuthorize("hasRole('USER')")
+//    @Secured({"ADMINISTRATOR", "SUPPORT"})
     public List<UserRegisterResponse> findAllUsers() {
         return userService.getAllUsers();
     }
 
     @DeleteMapping("/api/auth/user/{username}")
-    @PreAuthorize("hasRole('USER')")
+//    @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<DeleteUserResponse> deleteUser(@PathVariable String username) throws UserNotFoundException {
         userService.deleteUser(username);
         return ResponseEntity.ok(new DeleteUserResponse(username, "Deleted successfully!"));
     }
+
+    @PutMapping("/api/auth/role")
+//    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    public ResponseEntity<UserRegisterResponse> updateRole(@RequestBody UserRoleUpdateRequest user) throws UserNotFoundException, NotViableRoleException, IllegalRoleUpdateException {
+        UserRegisterResponse response = userService.updateUserRole(user);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/api/auth/access")
+//    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    public ResponseEntity<AccessResponse> grantAccess(@RequestBody AccessRequest request) throws UserNotFoundException, IllegalActionException {
+        AccessResponse response = userService.updateAccess(request);
+        return ResponseEntity.status(200).body(response);
+    }
+
 
 }
