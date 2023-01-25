@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -11,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
@@ -24,13 +26,13 @@ public class SecurityConfiguration {
                 .csrf().disable().headers().frameOptions().disable() // for Postman, the H2 console
                 .and()
                 .authorizeRequests() // manage access
-                .antMatchers(HttpMethod.POST, "/api/auth/user").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/antifraud/transaction/**").hasAuthority("MERCHANT")
-                .antMatchers(HttpMethod.GET, "/api/auth/list").hasAnyAuthority("ADMINISTRATOR", "SUPPORT")
-                .antMatchers(HttpMethod.DELETE, "/api/auth/user/{username}").hasAuthority("ADMINISTRATOR")
-                .antMatchers(HttpMethod.PUT, "/api/auth/role").hasAuthority("ADMINISTRATOR")
-                .antMatchers(HttpMethod.PUT, "/api/auth/access").hasAuthority("ADMINISTRATOR")
-                .antMatchers("/actuator/shutdown").permitAll() // needs to run test
+                .mvcMatchers(HttpMethod.POST, "/api/auth/user").permitAll()
+                .mvcMatchers(HttpMethod.POST, "/api/antifraud/transaction/**").authenticated()
+                .antMatchers(HttpMethod.GET, "/api/auth/list").hasAnyRole("ADMINISTRATOR", "SUPPORT")
+                .antMatchers(HttpMethod.DELETE, "/api/auth/user/**").hasRole("ADMINISTRATOR")
+                .antMatchers(HttpMethod.PUT, "/api/auth/role").hasRole("ADMINISTRATOR")
+                .antMatchers(HttpMethod.PUT, "/api/auth/access").hasRole("ADMINISTRATOR")
+                .mvcMatchers("/actuator/shutdown").permitAll()// needs to run test
                 // other matchers
                 .and()
                 .sessionManagement()

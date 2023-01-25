@@ -43,14 +43,14 @@ public class UserServiceImpl implements UserService {
                         .username(user.getUsername())
                         .password(encoder.encode(user.getPassword()))
                         .role(UserRole.ADMINISTRATOR)
-                        .isUnlocked(true)
+                        .isAccountNonLocked(true)
                         .build() :
                 User.builder()
                         .name(user.getName())
                         .username(user.getUsername())
                         .password(encoder.encode(user.getPassword()))
                         .role(UserRole.MERCHANT)
-                        .isUnlocked(false)
+                        .isAccountNonLocked(false)
                         .build();
 
 
@@ -99,14 +99,14 @@ public class UserServiceImpl implements UserService {
         if (optionalUser.isEmpty()) throw new UserNotFoundException("User not found");
 
         User existingUser = optionalUser.get();
-        String access = existingUser.isUnlocked() ? "unlocked" : "locked";
+        String access = existingUser.isAccountNonLocked() ? "unlocked" : "locked";
         if (existingUser.getRole().equals(UserRole.ADMINISTRATOR) || request.getOperation().equals("ADMINISTRATOR")) {
             throw new IllegalActionException("ADMINISTRATOR is already assign");
-        } else if ((existingUser.isUnlocked()) && request.getOperation().equals("LOCK")) {
-            existingUser.setUnlocked(false);
+        } else if ((existingUser.isAccountNonLocked()) && request.getOperation().equals("LOCK")) {
+            existingUser.setAccountNonLocked(false);
             access = "locked";
-        } else if (!(existingUser.isUnlocked()) && request.getOperation().equals("UNLOCK")) {
-            existingUser.setUnlocked(true);
+        } else if (!(existingUser.isAccountNonLocked()) && request.getOperation().equals("UNLOCK")) {
+            existingUser.setAccountNonLocked(true);
             access = "unlocked";
         }
         userRepository.save(existingUser);
