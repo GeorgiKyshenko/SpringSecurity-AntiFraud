@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface IPRepository extends JpaRepository<IPs, Long> {
     Optional<IPs> findIPsByIp(String ip);
+    void deleteByIp(String ip);
 }

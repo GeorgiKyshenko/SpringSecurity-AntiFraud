@@ -24,7 +24,7 @@ public class TransactionController {
 
     @PostMapping(value = "/transaction")
     @PreAuthorize("hasRole('MERCHANT')")
-    TransactionDTO transaction(@RequestBody @Valid Transaction req) throws CannotParseException, NegativeNumberException {
+    public TransactionDTO transaction(@RequestBody @Valid Transaction req) throws CannotParseException, NegativeNumberException {
         log.info("Requested {}", req.getAmount());
         TransactionOutput result = transactionService.processing(req.getAmount());
         return new TransactionDTO(result);

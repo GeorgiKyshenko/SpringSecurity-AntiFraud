@@ -66,4 +66,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(409)
                 .body(new ErrorDTO(exception.getMessage()));
     }
+
+    @ExceptionHandler
+    ResponseEntity<ErrorDTO> errorHandler(IpNotFoundException exception) {
+        log.info("IP not found in the database exception");
+        return ResponseEntity.status(404)
+                .body(new ErrorDTO(exception.getMessage()));
+    }
+
+    @ExceptionHandler
+    ResponseEntity<ErrorDTO> errorHandler(IncorrectIpInput exception) {
+        log.info("Wrong IP format exception");
+        return ResponseEntity.status(400)
+                .body(new ErrorDTO(exception.getMessage()));
+    }
 }

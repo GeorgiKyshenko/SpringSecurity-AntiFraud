@@ -28,6 +28,7 @@ public class SecurityConfiguration {
                 .authorizeRequests() // manage access
                 .mvcMatchers(HttpMethod.POST, "/api/auth/user").permitAll()
                 .mvcMatchers(HttpMethod.DELETE, "/api/auth/user/**").hasRole("ADMINISTRATOR")//test does not pass if .authenticated() is set
+                .mvcMatchers(HttpMethod.DELETE, "/api/antifraud/suspicious-ip/{ip}").hasRole("SUPPORT")
 //                .mvcMatchers(HttpMethod.POST, "/api/antifraud/transaction/**").authenticated()
 //                .antMatchers(HttpMethod.GET, "/api/auth/list").hasAnyRole("ADMINISTRATOR", "SUPPORT")
 //                .antMatchers(HttpMethod.PUT, "/api/auth/role").hasRole("ADMINISTRATOR")
