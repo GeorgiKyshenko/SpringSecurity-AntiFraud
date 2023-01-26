@@ -59,4 +59,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404)
                 .body(new ErrorDTO(exception.getMessage()));
     }
+
+    @ExceptionHandler
+    ResponseEntity<ErrorDTO> errorHandler(IpDuplicateException exception) {
+        log.info("Duplicate IP exception");
+        return ResponseEntity.status(409)
+                .body(new ErrorDTO(exception.getMessage()));
+    }
 }
