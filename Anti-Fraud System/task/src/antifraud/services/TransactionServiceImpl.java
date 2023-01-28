@@ -49,19 +49,24 @@ public class TransactionServiceImpl implements TransactionService {
         } else if (amountNumber <= AmountVerification.MANUAL_PROCESSING.getAmount() && ip.isEmpty() && card.isEmpty()) {
             return new TransactionDTO(TransactionOutput.MANUAL_PROCESSING, "amount");
         } else {
-            StringJoiner stringJoiner = new StringJoiner(", ");
-            if (Long.parseLong(transaction.getAmount()) >= AmountVerification.MANUAL_PROCESSING.getAmount()) {
-                stringJoiner.add("amount");
-            }
-            if (ip.isPresent() && card.isPresent()) {
-                stringJoiner.add("card-number");
-                stringJoiner.add("ip");
-            } else if (card.isPresent()) {
-                stringJoiner.add("card-number");
-            } else if (ip.isPresent()) {
-                stringJoiner.add("ip");
-            }
+            StringJoiner stringJoiner = outputResult(transaction, ip, card);
             return new TransactionDTO(TransactionOutput.PROHIBITED, stringJoiner.toString());
         }
+    }
+
+    private StringJoiner outputResult(Transaction transaction, Optional<IPs> ip, Optional<Card> card) {
+        StringJoiner stringJoiner = new StringJoiner(", ");
+        if (Long.parseLong(transaction.getAmount()) >= AmountVerification.MANUAL_PROCESSING.getAmount()) {
+            stringJoiner.add("amount");
+        }
+        if (ip.isPresent() && card.isPresent()) {
+            stringJoiner.add("card-number");
+            stringJoiner.add("ip");
+        } else if (card.isPresent()) {
+            stringJoiner.add("card-number");
+        } else if (ip.isPresent()) {
+            stringJoiner.add("ip");
+        }
+        return stringJoiner;
     }
 }
