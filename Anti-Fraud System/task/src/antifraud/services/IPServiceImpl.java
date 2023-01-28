@@ -9,9 +9,12 @@ import antifraud.models.DTO.IPResponse;
 import antifraud.repositories.IPRepository;
 import antifraud.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,7 +22,7 @@ import java.util.Optional;
 public class IPServiceImpl implements IPService {
 
     private final IPRepository ipRepository;
-    private final UserRepository userRepository;
+    private final ModelMapper mapper;
 
     @Override
     @Transactional
@@ -50,5 +53,12 @@ public class IPServiceImpl implements IPService {
         if (!ip.matches(pattern)) {
             throw new IncorrectIpInput("Not a valid IP");
         }
+    }
+
+    @Override
+    public List<IPResponse> findAllIPs() {
+        return ipRepository.findAll(Sort.sort(IPs.class).by(IPs::getId).ascending())
+                .stream()
+                .map(ip -> mapper.map(ip, IPResponse.class)).toList();
     }
 }

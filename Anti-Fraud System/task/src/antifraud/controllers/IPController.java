@@ -13,25 +13,31 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/antifraud/")
+@PreAuthorize("hasRole('SUPPORT')")
 public class IPController {
 
     private final IPService ipService;
 
-    @PostMapping("/api/antifraud/suspicious-ip")
-    @PreAuthorize("hasRole('SUPPORT')")
+    @PostMapping("/suspicious-ip")
     public ResponseEntity<IPResponse> saveIPAddress(@RequestBody @Valid IPs ip) throws IpDuplicateException {
         IPResponse ipResponse = ipService.saveIp(ip);
         return ResponseEntity.status(200).body(ipResponse);
     }
 
-    @DeleteMapping("/api/antifraud/suspicious-ip/{ip}")
-    @PreAuthorize("hasRole('SUPPORT')")
+    @DeleteMapping("/suspicious-ip/{ip}")
     public ResponseEntity<DeleteIPResponse> deleteIp(@PathVariable String ip) throws IpNotFoundException, IncorrectIpInput {
         ipService.validateString(ip);
         DeleteIPResponse deleteIP = ipService.deleteIp(ip);
         return ResponseEntity.status(200).body(deleteIP);
+    }
+
+    @GetMapping("/suspicious-ip")
+    public List<IPResponse> getAllIPs() {
+        return ipService.findAllIPs();
     }
 }

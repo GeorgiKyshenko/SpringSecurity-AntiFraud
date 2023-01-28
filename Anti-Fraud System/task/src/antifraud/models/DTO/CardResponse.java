@@ -4,10 +4,8 @@ import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-public class IPResponse {
-    private Long id;
-    private String ip;
+@Getter@Setter
+public class CardResponse {
+    Long id;
+    String number;
 }
-

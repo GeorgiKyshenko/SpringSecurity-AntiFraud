@@ -6,4 +6,5 @@ import lombok.Value;
 @Value
 public class TransactionDTO {
     TransactionOutput result;
+    String info;
 }
