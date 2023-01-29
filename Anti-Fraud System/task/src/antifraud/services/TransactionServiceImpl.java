@@ -19,7 +19,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,6 +29,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final IPRepository ipRepository;
     private final CardRepository cardRepository;
+    private static final int NUMBER_OF_REQUESTS = 3;
 
     @Override
     @Transactional
@@ -53,9 +53,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .findByNumberAndDateBetween(transaction.getNumber(), transaction.getDate().minusHours(1), transaction.getDate());
         List<String> stringResults = new ArrayList<>();
 
-        if (checkForCorrelationOnProhibited(listOfTransactions, stringResults, amountNumber, ip, card)) {
+        if (checkForProhibitedActions(listOfTransactions, stringResults, amountNumber, ip, card)) {
             return new TransactionDTO(TransactionOutput.PROHIBITED, stringResults.stream().sorted().collect(Collectors.joining(", ")));
-        } else if (checkForCorrelationOnManualProcessing(listOfTransactions, stringResults, amountNumber)) {
+        } else if (checksForManualProcessing(listOfTransactions, stringResults, amountNumber)) {
             return new TransactionDTO(TransactionOutput.MANUAL_PROCESSING, stringResults.stream().sorted().collect(Collectors.joining(", ")));
         } else {
             return new TransactionDTO(TransactionOutput.ALLOWED, "none");
@@ -63,7 +63,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-    private boolean checkForCorrelationOnManualProcessing
+    private boolean checksForManualProcessing
             (List<Transaction> listOfTransactions, List<String> result, long amountNumber) {
         long iPRequests = listOfTransactions.stream().map(Transaction::getIp).distinct().count();
         long regionRequests = listOfTransactions.stream().map(Transaction::getRegion).distinct().count();
@@ -73,38 +73,39 @@ public class TransactionServiceImpl implements TransactionService {
             result.add("amount");
             flag = true;
         }
-        if (iPRequests == 3 && regionRequests == 3) {
+        if (iPRequests == NUMBER_OF_REQUESTS && regionRequests == NUMBER_OF_REQUESTS) {
             result.add("ip-correlation");
             result.add("region-correlation");
             flag = true;
-        } else if (iPRequests == 3) {
+        } else if (iPRequests == NUMBER_OF_REQUESTS) {
             result.add("ip-correlation");
             flag = true;
-        } else if (regionRequests == 3) {
+        } else if (regionRequests == NUMBER_OF_REQUESTS) {
             result.add("region-correlation");
             flag = true;
         }
         return flag;
     }
 
-    private boolean checkForCorrelationOnProhibited(List<Transaction> listOfTransactions, List<String> result,
-                                                    long amountNumber, Optional<IPs> ip, Optional<Card> card) {
+    private boolean checkForProhibitedActions(List<Transaction> listOfTransactions, List<String> result,
+                                              long amountNumber, Optional<IPs> ip, Optional<Card> card) {
         long iPRequests = listOfTransactions.stream().map(Transaction::getIp).distinct().count();
         long regionRequests = listOfTransactions.stream().map(Transaction::getRegion).distinct().count();
         boolean flag = false;
 
-        if (amountNumber > AmountVerification.MANUAL_PROCESSING.getAmount()) {
+        if (amountNumber > AmountVerification.MANUAL_PROCESSING.getAmount() || amountNumber > AmountVerification.ALLOWED.getAmount()) {
             result.add("amount");
             flag = true;
         }
-        if (iPRequests > 3 && regionRequests > 3) {
+        if (iPRequests > NUMBER_OF_REQUESTS && regionRequests > NUMBER_OF_REQUESTS
+                || iPRequests == NUMBER_OF_REQUESTS && regionRequests == NUMBER_OF_REQUESTS) {
             result.add("ip-correlation");
             result.add("region-correlation");
             flag = true;
-        } else if (iPRequests > 3) {
+        } else if (iPRequests > NUMBER_OF_REQUESTS || iPRequests == NUMBER_OF_REQUESTS) {
             result.add("ip-correlation");
             flag = true;
-        } else if (regionRequests > 3) {
+        } else if (regionRequests > NUMBER_OF_REQUESTS || regionRequests == NUMBER_OF_REQUESTS) {
             result.add("region-correlation");
             flag = true;
         }
@@ -122,20 +123,3 @@ public class TransactionServiceImpl implements TransactionService {
         return flag;
     }
 }
-
-
-//    private StringJoiner outputResult(Transaction transaction, Optional<IPs> ip, Optional<Card> card) {
-//        StringJoiner stringJoiner = new StringJoiner(", ");
-//        if (Long.parseLong(transaction.getAmount()) >= AmountVerification.MANUAL_PROCESSING.getAmount()) {
-//            stringJoiner.add("amount");
-//        }
-//        if (ip.isPresent() && card.isPresent()) {
-//            stringJoiner.add("card-number");
-//            stringJoiner.add("ip");
-//        } else if (card.isPresent()) {
-//            stringJoiner.add("card-number");
-//        } else if (ip.isPresent()) {
-//            stringJoiner.add("ip");
-//        }
-//        return stringJoiner;
-//    }
