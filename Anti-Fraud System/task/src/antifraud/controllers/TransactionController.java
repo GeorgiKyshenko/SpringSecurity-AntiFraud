@@ -1,10 +1,9 @@
 package antifraud.controllers;
 
-import antifraud.constants.TransactionOutput;
 import antifraud.errors.CannotParseException;
 import antifraud.errors.NegativeNumberException;
 import antifraud.models.DTO.TransactionDTO;
-import antifraud.models.Transaction;
+import antifraud.models.database.Transaction;
 import antifraud.services.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

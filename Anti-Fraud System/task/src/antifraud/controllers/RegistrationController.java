@@ -1,13 +1,11 @@
 package antifraud.controllers;
 
-import antifraud.database.User;
 import antifraud.errors.*;
 import antifraud.models.DTO.*;
-import antifraud.models.UserRegisterRequest;
+import antifraud.models.DTO.UserRegisterRequest;
 import antifraud.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 

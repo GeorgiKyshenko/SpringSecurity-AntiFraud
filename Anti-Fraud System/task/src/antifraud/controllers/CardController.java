@@ -1,11 +1,9 @@
 package antifraud.controllers;
 
-import antifraud.database.Card;
+import antifraud.models.database.Card;
 import antifraud.models.DTO.CardResponse;
-import antifraud.models.DTO.IPResponse;
 import antifraud.services.CardService;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.constraints.LuhnCheck;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package antifraud.database;
+package antifraud.models.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;

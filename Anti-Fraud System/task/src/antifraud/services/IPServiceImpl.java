@@ -1,13 +1,12 @@
 package antifraud.services;
 
-import antifraud.database.IPs;
+import antifraud.models.database.IPs;
 import antifraud.errors.IncorrectIpInput;
 import antifraud.errors.IpDuplicateException;
 import antifraud.errors.IpNotFoundException;
 import antifraud.models.DTO.DeleteIPResponse;
 import antifraud.models.DTO.IPResponse;
 import antifraud.repositories.IPRepository;
-import antifraud.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;

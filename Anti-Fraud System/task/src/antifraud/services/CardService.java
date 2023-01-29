@@ -1,6 +1,6 @@
 package antifraud.services;
 
-import antifraud.database.Card;
+import antifraud.models.database.Card;
 import antifraud.models.DTO.CardResponse;
 
 import java.util.List;

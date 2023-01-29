@@ -1,6 +1,6 @@
 package antifraud.controllers;
 
-import antifraud.database.IPs;
+import antifraud.models.database.IPs;
 import antifraud.errors.IncorrectIpInput;
 import antifraud.errors.IpDuplicateException;
 import antifraud.errors.IpNotFoundException;

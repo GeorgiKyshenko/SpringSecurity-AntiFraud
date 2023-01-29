@@ -1,13 +1,13 @@
 package antifraud.services;
 
 import antifraud.constants.UserRole;
-import antifraud.database.User;
+import antifraud.models.database.User;
 import antifraud.errors.*;
 import antifraud.models.DTO.AccessRequest;
 import antifraud.models.DTO.AccessResponse;
 import antifraud.models.DTO.UserRegisterResponse;
 import antifraud.models.DTO.UserRoleUpdateRequest;
-import antifraud.models.UserRegisterRequest;
+import antifraud.models.DTO.UserRegisterRequest;
 import antifraud.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
