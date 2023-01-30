@@ -6,8 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findByNumberAndDateBetween(String number, LocalDateTime startDate, LocalDateTime endDate);
+
+    List<Transaction> findAllByNumber(String number);
+    List<Transaction> findAll();
+    Optional<Transaction> findFirstByNumber(String number);
 }

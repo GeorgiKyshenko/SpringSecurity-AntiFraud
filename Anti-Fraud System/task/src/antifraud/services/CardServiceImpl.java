@@ -3,6 +3,7 @@ package antifraud.services;
 import antifraud.models.database.Card;
 import antifraud.models.DTO.CardResponse;
 import antifraud.repositories.CardRepository;
+import antifraud.utils.CardValidator;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
@@ -23,7 +24,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public CardResponse saveCard(Card stolenCard) {
-        Optional<Card> cardByNumber = cardRepository.findCardByNumber(stolenCard.getNumber());
+        Optional<Card> cardByNumber = cardRepository.findByNumber(stolenCard.getNumber());
         if (cardByNumber.isEmpty()) {
             cardRepository.save(stolenCard);
         } else {
@@ -35,8 +36,8 @@ public class CardServiceImpl implements CardService {
     @Override
     @Transactional
     public void deleteCardFromDB(String number) {
-        validateCardNumber(number);
-        Optional<Card> cardByNumber = cardRepository.findCardByNumber(number);
+        CardValidator.validateCardNumber(number);
+        Optional<Card> cardByNumber = cardRepository.findByNumber(number);
         if (cardByNumber.isPresent()) {
             cardRepository.deleteById(cardByNumber.get().getId());
         } else {
@@ -52,25 +53,25 @@ public class CardServiceImpl implements CardService {
     }
 
 
-    private void validateCardNumber(String number) {
-        int cardDigits = number.length();
-
-        int nSum = 0;
-        boolean isSecond = false;
-        for (int i = cardDigits - 1; i >= 0; i--) {
-
-            int d = number.charAt(i) - '0';
-
-            if (isSecond)
-                d = d * 2;
-
-            nSum += d / 10;
-            nSum += d % 10;
-
-            isSecond = !isSecond;
-        }
-        if (!(nSum % 10 == 0)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-    }
+//    private void validateCardNumber(String number) {
+//        int cardDigits = number.length();
+//
+//        int nSum = 0;
+//        boolean isSecond = false;
+//        for (int i = cardDigits - 1; i >= 0; i--) {
+//
+//            int d = number.charAt(i) - '0';
+//
+//            if (isSecond)
+//                d = d * 2;
+//
+//            nSum += d / 10;
+//            nSum += d % 10;
+//
+//            isSecond = !isSecond;
+//        }
+//        if (!(nSum % 10 == 0)) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+//        }
+//    }
 }

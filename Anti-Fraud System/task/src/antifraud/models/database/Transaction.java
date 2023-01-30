@@ -1,6 +1,7 @@
 package antifraud.models.database;
 
 import antifraud.constants.Region;
+import antifraud.constants.TransactionOutput;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
@@ -12,7 +13,6 @@ import org.springframework.validation.annotation.Validated;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 @Getter
@@ -40,4 +40,14 @@ public class Transaction {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @NotNull
     private LocalDateTime date;
+    @Enumerated(EnumType.STRING)
+    @JsonIgnore
+    private TransactionOutput result;
+    @Enumerated(EnumType.STRING)
+    @JsonIgnore
+    private TransactionOutput feedback;
+
+    public String getFeedback() {
+        return feedback == null ? "" : feedback.name();
+    }
 }
