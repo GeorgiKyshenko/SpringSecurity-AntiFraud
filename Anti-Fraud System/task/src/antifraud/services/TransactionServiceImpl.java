@@ -97,14 +97,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         checkForValidFeedback(feedback, transactionById);
         Transaction transaction = transactionById.get();
-        setMaxAllowedValueAndMaxManualValu(feedback, transaction);
+        setMaxAllowedValueAndMaxManualValue(feedback, transaction);
         userCardRepository.save(checkingCard);
         transaction.setFeedback(feedback.getFeedback());
         transactionRepository.save(transaction);
         return mapper.map(transaction, TransactionInfo.class);
 
     }
-    private void setMaxAllowedValueAndMaxManualValu(TransactionFeedback feedback, Transaction transaction) {
+    private void setMaxAllowedValueAndMaxManualValue(TransactionFeedback feedback, Transaction transaction) {
         if (transaction.getResult().equals(TransactionOutput.ALLOWED) && feedback.getFeedback().equals(TransactionOutput.MANUAL_PROCESSING)) {
             checkingCard.setAllowedValue((int) Math.ceil(0.8 * checkingCard.getAllowedValue() - (0.2 * Integer.parseInt(transaction.getAmount()))));
         } else if (transaction.getResult().equals(TransactionOutput.ALLOWED) && feedback.getFeedback().equals(TransactionOutput.PROHIBITED)) {
