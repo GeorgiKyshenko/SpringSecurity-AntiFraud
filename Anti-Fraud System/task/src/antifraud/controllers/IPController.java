@@ -7,6 +7,7 @@ import antifraud.errors.IpNotFoundException;
 import antifraud.models.DTO.DeleteIPResponse;
 import antifraud.models.DTO.IPResponse;
 import antifraud.services.IPService;
+import antifraud.utils.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +32,7 @@ public class IPController {
 
     @DeleteMapping("/suspicious-ip/{ip}")
     public ResponseEntity<DeleteIPResponse> deleteIp(@PathVariable String ip) throws IpNotFoundException, IncorrectIpInput {
-        ipService.validateString(ip);
+        Validator.validateIpFormat(ip);
         DeleteIPResponse deleteIP = ipService.deleteIp(ip);
         return ResponseEntity.status(200).body(deleteIP);
     }

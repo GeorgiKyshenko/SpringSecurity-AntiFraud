@@ -47,14 +47,6 @@ public class IPServiceImpl implements IPService {
     }
 
     @Override
-    public void validateString(String ip) throws IncorrectIpInput {
-        String pattern = "^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.(?!$)|$)){4}$";
-        if (!ip.matches(pattern)) {
-            throw new IncorrectIpInput("Not a valid IP");
-        }
-    }
-
-    @Override
     public List<IPResponse> findAllIPs() {
         return ipRepository.findAll(Sort.sort(IPs.class).by(IPs::getId).ascending())
                 .stream()

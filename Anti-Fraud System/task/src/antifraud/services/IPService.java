@@ -14,7 +14,5 @@ public interface IPService {
 
     DeleteIPResponse deleteIp(String ip) throws IpNotFoundException;
 
-    void validateString(String ip) throws IncorrectIpInput;
-
     List<IPResponse> findAllIPs();
 }

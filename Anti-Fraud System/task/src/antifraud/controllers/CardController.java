@@ -18,6 +18,7 @@ import java.util.List;
 public class CardController {
 
     private final CardService cardService;
+    private static final String SUCCESSFUL_REMOVE = "Card %s successfully removed!";
 
     @PostMapping
     public ResponseEntity<CardResponse> saveStolenCardNumber(@RequestBody @Valid Card stolenCard) {
@@ -31,7 +32,7 @@ public class CardController {
     @DeleteMapping("{number}")
     public ResponseEntity<DeleteCardResponse> deleteCard(@PathVariable String number) {
         cardService.deleteCardFromDB(number);
-        return ResponseEntity.status(200).body(new DeleteCardResponse(String.format("Card %s successfully removed!", number)));
+        return ResponseEntity.status(200).body(new DeleteCardResponse(String.format(SUCCESSFUL_REMOVE, number)));
     }
 
     @GetMapping

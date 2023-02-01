@@ -17,6 +17,7 @@ import java.util.List;
 public class RegistrationController {
 
     private final UserService userService;
+    private static final String SUCCESSFUL_DELETE = "Deleted successfully!";
 
     @PostMapping("/api/auth/user")
     public ResponseEntity<UserRegisterResponse> userRegister(@RequestBody @Valid UserRegisterRequest user) throws ExistingUserException {
@@ -34,7 +35,7 @@ public class RegistrationController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<DeleteUserResponse> deleteUser(@PathVariable String username) throws UserNotFoundException {
         userService.deleteUser(username);
-        return ResponseEntity.ok(new DeleteUserResponse(username, "Deleted successfully!"));
+        return ResponseEntity.ok(new DeleteUserResponse(username, SUCCESSFUL_DELETE));
     }
 
     @PutMapping("/api/auth/role")

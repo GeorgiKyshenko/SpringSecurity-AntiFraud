@@ -26,7 +26,5 @@ public class UserCard {
 
     public UserCard(String number) {
         this.number = number;
-        this.allowedValue = 200;
-        this.manualValue = 1500;
     }
 }

@@ -15,7 +15,7 @@ import antifraud.repositories.CardRepository;
 import antifraud.repositories.IPRepository;
 import antifraud.repositories.TransactionRepository;
 import antifraud.repositories.UserCardRepository;
-import antifraud.utils.CardValidator;
+import antifraud.utils.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -40,6 +40,8 @@ public class TransactionServiceImpl implements TransactionService {
     private final UserCardRepository userCardRepository;
     private final ModelMapper mapper;
     private static final int NUMBER_OF_REQUESTS = 3;
+    private static final double LIMIT_MODIFIER = 0.8;
+    private static final double TRANSACTION_MODIFIER = 0.2;
     private UserCard checkingCard;
 
     @Override
@@ -63,6 +65,7 @@ public class TransactionServiceImpl implements TransactionService {
         Optional<Card> card = cardRepository.findByNumber(transaction.getNumber());
         List<Transaction> listOfTransactions = transactionRepository
                 .findByNumberAndDateBetween(transaction.getNumber(), transaction.getDate().minusHours(1), transaction.getDate());
+
         List<String> stringResults = new ArrayList<>();
         long iPRequests = listOfTransactions.stream().map(Transaction::getIp).distinct().count();
         long regionRequests = listOfTransactions.stream().map(Transaction::getRegion).distinct().count();
@@ -77,17 +80,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (checkForProhibitedActions(iPRequests, regionRequests, stringResults, amountNumber, ip, card, checkingCard)) {
             newTransaction.setResult(TransactionOutput.PROHIBITED);
-            transactionRepository.save(newTransaction);
-            return new TransactionDTO(TransactionOutput.PROHIBITED, stringResults.stream().sorted().collect(Collectors.joining(", ")));
         } else if (checksForManualProcessing(iPRequests, regionRequests, stringResults, amountNumber, checkingCard)) {
             newTransaction.setResult(TransactionOutput.MANUAL_PROCESSING);
-            transactionRepository.save(newTransaction);
-            return new TransactionDTO(TransactionOutput.MANUAL_PROCESSING, stringResults.stream().sorted().collect(Collectors.joining(", ")));
         } else {
             newTransaction.setResult(TransactionOutput.ALLOWED);
-            transactionRepository.save(newTransaction);
-            return new TransactionDTO(TransactionOutput.ALLOWED, "none");
+            stringResults.add("none");
         }
+        transactionRepository.save(newTransaction);
+        return new TransactionDTO(newTransaction.getResult(), stringResults.stream().sorted().collect(Collectors.joining(", ")));
     }
 
     @Override
@@ -97,6 +97,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         checkForValidFeedback(feedback, transactionById);
         Transaction transaction = transactionById.get();
+        checkingCard = userCardRepository.findLastByNumber(transaction.getNumber()).get();
         setMaxAllowedValueAndMaxManualValue(feedback, transaction);
         userCardRepository.save(checkingCard);
         transaction.setFeedback(feedback.getFeedback());
@@ -104,23 +105,34 @@ public class TransactionServiceImpl implements TransactionService {
         return mapper.map(transaction, TransactionInfo.class);
 
     }
+
     private void setMaxAllowedValueAndMaxManualValue(TransactionFeedback feedback, Transaction transaction) {
+        long maxAllowedValue = checkingCard.getAllowedValue();
+        long maxManualValue = checkingCard.getManualValue();
+        long transactionAmount = Long.parseLong(transaction.getAmount());
+
+        double allowedLimitDecrease = Math.ceil((LIMIT_MODIFIER * maxAllowedValue) - (TRANSACTION_MODIFIER * transactionAmount));
+        double allowedLimitIncrease = Math.ceil((LIMIT_MODIFIER * maxAllowedValue) + (TRANSACTION_MODIFIER * transactionAmount));
+        double manualLimitDecrease = Math.ceil((LIMIT_MODIFIER * maxManualValue) - (TRANSACTION_MODIFIER * transactionAmount));
+        double manualLimitIncrease = Math.ceil((LIMIT_MODIFIER * maxManualValue) + (TRANSACTION_MODIFIER * transactionAmount));
+
         if (transaction.getResult().equals(TransactionOutput.ALLOWED) && feedback.getFeedback().equals(TransactionOutput.MANUAL_PROCESSING)) {
-            checkingCard.setAllowedValue((int) Math.ceil(0.8 * checkingCard.getAllowedValue() - (0.2 * Integer.parseInt(transaction.getAmount()))));
+            checkingCard.setAllowedValue((int) allowedLimitDecrease);
         } else if (transaction.getResult().equals(TransactionOutput.ALLOWED) && feedback.getFeedback().equals(TransactionOutput.PROHIBITED)) {
-            checkingCard.setAllowedValue((int) Math.ceil(0.8 * checkingCard.getAllowedValue() - (0.2 * Integer.parseInt(transaction.getAmount()))));
-            checkingCard.setManualValue((int) Math.ceil(0.8 * checkingCard.getManualValue() - (0.2 * Integer.parseInt(transaction.getAmount()))));
+            checkingCard.setAllowedValue((int) allowedLimitDecrease);
+            checkingCard.setManualValue((int) manualLimitDecrease);
         } else if (transaction.getResult().equals(TransactionOutput.MANUAL_PROCESSING) && feedback.getFeedback().equals(TransactionOutput.ALLOWED)) {
-            checkingCard.setAllowedValue((int) Math.ceil(0.8 * checkingCard.getAllowedValue() + (0.2 * Integer.parseInt(transaction.getAmount()))));
+            checkingCard.setAllowedValue((int) allowedLimitIncrease);
         } else if (transaction.getResult().equals(TransactionOutput.MANUAL_PROCESSING) && feedback.getFeedback().equals(TransactionOutput.PROHIBITED)) {
-            checkingCard.setManualValue((int) Math.ceil(0.8 * checkingCard.getManualValue() - (0.2 * Integer.parseInt(transaction.getAmount()))));
+            checkingCard.setManualValue((int) manualLimitDecrease);
         } else if (transaction.getResult().equals(TransactionOutput.PROHIBITED) && feedback.getFeedback().equals(TransactionOutput.ALLOWED)) {
-            checkingCard.setAllowedValue((int) Math.ceil(0.8 * checkingCard.getAllowedValue() + (0.2 * Integer.parseInt(transaction.getAmount()))));
-            checkingCard.setManualValue((int) Math.ceil(0.8 * checkingCard.getManualValue() + (0.2 * Integer.parseInt(transaction.getAmount()))));
+            checkingCard.setAllowedValue((int) allowedLimitIncrease);
+            checkingCard.setManualValue((int) manualLimitIncrease);
         } else if (transaction.getResult().equals(TransactionOutput.PROHIBITED) && feedback.getFeedback().equals(TransactionOutput.MANUAL_PROCESSING)) {
-            checkingCard.setManualValue((int) Math.ceil(0.8 * checkingCard.getManualValue() + (0.2 * Integer.parseInt(transaction.getAmount()))));
+            checkingCard.setManualValue((int) manualLimitIncrease);
         }
     }
+
 
     private static void checkForValidFeedback(TransactionFeedback feedback, Optional<Transaction> transactionById) {
         if (transactionById.isEmpty()) {
@@ -134,7 +146,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionInfo> getTransactions(String number) {
-        CardValidator.validateCardNumber(number);
+        Validator.validateCardNumber(number);
         Optional<Transaction> optionalTransaction = transactionRepository.findFirstByNumber(number);
         if (optionalTransaction.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -163,7 +175,6 @@ public class TransactionServiceImpl implements TransactionService {
             result.add("amount");
             flag = true;
         }
-
 
         if (iPRequests == NUMBER_OF_REQUESTS && regionRequests == NUMBER_OF_REQUESTS) {
             result.add("ip-correlation");
